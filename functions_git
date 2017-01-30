@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#
+# Bash shell functions for Git. 
+#
+
+set -e
+set -u
+
+# Die with error message.
+exit_error() # {{{
+{
+	echo "$0: Error: $*" >&2
+	exit 1
+} # }}}
+
+branches_all() # {{{
+{
+	for branch in $(git branch | sed 's/\n//' | sed 's/^*//'); do
+		BRANCHES+=($branch)
+	done
+	echo "${BRANCHES[*]}"
+} # }}}
