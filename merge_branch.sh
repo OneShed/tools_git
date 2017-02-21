@@ -14,6 +14,8 @@ SCRIPTS_DIR=$(dirname $0)
 
 repos=$(${SCRIPTS_DIR}/git_branches_all.sh | grep ${BRANCH} | awk '{print $1}')
 
+# TODO ignore PREPROD
+
 for repo in ${repos[*]}; do
     cd $repo
     echo "Merging ${BRANCH} to master in repo $PWD"
