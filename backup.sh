@@ -23,10 +23,11 @@ PATH=/bin:/usr/bin
 # What to backup
 # vmdevcfm specific stuff
 GIT_REPOS="/local/git"
-JENKINS_JOBS="/local/jenkins/jobs"
+JENKINS_HOME="/local/jenkins"
 GIT_SCM_REPOS="/local/git/repos/"
 GIT_SCM="/local/git/scm/"
 LOCAL_PUB="/local/pub"
+MERGE_ISSUES=/vobstore/disk9/statistics/merge_issues.json
 
 # other stuff
 BASHRC=/home/vobadm/.bashrc
@@ -165,11 +166,11 @@ if ! rsync -av $LOCAL_PUB/ $dst; then
 fi
 echo
 
-dst="$backup_dir/jenkins"
+dst="$backup_dir/jenkins_home"
 mkdir -p $dst
-echo "Content of $JENKINS_JOBS will be rsync-ed to $dst"
-if ! rsync -av $JENKINS_JOBS/ $dst; then
-    log_error "Failed to backup $JENKINS_JOBS"
+echo "Content of $JENKINS_HOME will be rsync-ed to $dst"
+if ! rsync -av $JENKINS_HOME/ $dst; then
+    log_error "Failed to backup $JENKINS_HOME"
 fi
 echo
 
@@ -185,6 +186,13 @@ dst="$backup_dir/misc/.profile"
 echo ".profile will be rsync-ed to $dst"
 if ! rsync -av $PROFILE $dst; then
     log_error "Failed to backup $PROFILE"
+fi
+echo
+
+dst="$backup_dir/misc/merge_issues.json"
+echo "merge_issues.json will be rsync-ed to $dst"
+if ! rsync -av $MERGE_ISSUES $dst; then
+    log_error "Failed to backup $MERGE_ISSUES"
 fi
 echo
 
