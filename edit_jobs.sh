@@ -1,11 +1,13 @@
 #!/bin/bash
 #
 # edit file content using vim substitute
+
+set -e
+set -u 
+set -x
 file=$1
 
-param="<hudson.model.StringParameterDefinition><name>_sire<\/name><description>SIRE number (only for PROD EPRs)<\/description><defaultValue><\/defaultValue><\/hudson.model.StringParameterDefinition>"
-
 eval "ex $file <<EOF
-:%s/<\/parameterDefinitions>/$param<\/parameterDefinitions>/g
+%s/\$\{_CYCLE}/\$\{_CYCLE} - \$\{_VERSION}/g
 :x
 EOF"

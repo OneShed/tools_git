@@ -14,6 +14,24 @@ exit_error() # {{{
 	exit 1
 } # }}}
 
+assert_dir() # {{{
+{
+    local dir=${1:-}
+
+    if [[ ! -d "$dir" ]]; then
+        return 1
+    fi
+} # }}}
+
+assert_file() # {{{
+{
+    local file=${1:-}
+
+    if [[ ! -f "$file" ]]; then
+        return 1
+    fi
+} # }}}
+
 branches_all() # {{{
 {
 	for branch in $(git branch | sed 's/\n//' | sed 's/^*//'); do

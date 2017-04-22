@@ -6,18 +6,28 @@
 # sync with other cycle branches.
 # Prompt user to do the commit. No automatic merging is done.
 # If merge conflict, ask user to resolve it.
-# 
+#
 # To be run within the root directory of git repos to-be-merged.
 
-# Example: $0 CBLR1720
+# Example: $0 CBLR1720 REPO1 REPO2 # REPO1 and REPO2 will be skipped
 
 set -e
 set -u
+set -x
 
 # source from the script's directory
 source "$(dirname $0)/functions_git"
 
+PARAMS=$*
 CYCLE_BRANCH="devl_${1,,}"
+REPOS_SKIPPED=${*:2}
+
+if [[ ! -n $REPOS_SKIPPED ]]; then
+    echo "No repos will be skipped"
+else
+    echo "Skipping repo(s) $REPOS_SKIPPED"
+fi
+
 DIR="$(dirname $0)"
 
 # Repos with $CYCLE_BRANCH
@@ -42,6 +52,11 @@ merge_branch()
 
 for repo in ${repos[*]}; do
 	cd $repo
+
+    if [[ "${REPOS_SKIPPED[*]}" =~ "$repo" ]]; then
+        echo "Skipping repo $repo"
+        continue
+    fi
 
 	# merge $CYCLE_BRANCH to master first
 	echo "Merging ${CYCLE_BRANCH} to master in repo ${repo}."

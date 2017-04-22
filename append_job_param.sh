@@ -11,11 +11,7 @@
 set -x
 
 file=$1
-param_name=$2
-desc=
-default_value=
 
-old="<\/parameterDefinitions>"
-#new="        <hudson.model.StringParameterDefinition>\n          <name>${param_name}</name>\n          <description>${desc}</description>\n          <defaultValue>${default_value}</defaultValue>\n        </hudson.model.StringParameterDefinition>\n      </parameterDefinitions>"
-new="  <hudson.model.StringParameterDefinition>\n          <name>${param_name}<\/name>\n          <description>${desc}<\/description>\n          <defaultValue>${default_value}<\/defaultValue>\n        <\/hudson.model.StringParameterDefinition>\n      <\/parameterDefinitions>"
+old="_sire=\${_sire}"
+new="_sire=\${_sire}\n_eeprid=\${_eeprid}"
 sed -i "s/$old/$new/" $1

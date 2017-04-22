@@ -14,22 +14,23 @@ BRANCH=devl_${1,,}
 source "$(dirname $0)/functions_git"
 
 for repo in $(ls); do
-	if [[ ! ${repo} =~ ".dtd" && ! ${repo} =~ ".sh" ]]; then
+    if [[ ! ${repo} =~ ".dtd" && ! ${repo} =~ ".sh" ]]; then
 
-		cd $repo
-		branches=$(branches_all)
+        cd $repo
+        branches=$(branches_all)
 
-		for branch in ${branches[*]}; do
+        for branch in ${branches[*]}; do
 
-			if [[ $branch == $BRANCH ]]; then
+            if [[ "${branch}" == "${BRANCH}" ]]; then
 
-				diff=$(git diff --raw master ${BRANCH})
+                diff=$(git diff --raw master ${BRANCH})
+                git diff --raw master ${BRANCH}
 
-				if [[ ! -z "${diff}" ]]; then
-					echo ${repo} ${branches[*]}
-				fi
-			fi
-		done	
-		cd ..
-	fi
+                if [[ ! -z "${diff}" ]]; then
+                    echo ${repo} ${branches[*]}
+                fi
+            fi
+        done	
+        cd ..
+    fi
 done
