@@ -25,7 +25,7 @@ REPOS_SKIPPED=${*:2}
 if [[ ! -n $REPOS_SKIPPED ]]; then
     echo "No repos will be skipped"
 else
-    echo "Skipping repo(s) $REPOS_SKIPPED"
+    echo "Repo(s) to be skipped: $REPOS_SKIPPED"
 fi
 
 DIR="$(dirname $0)"
