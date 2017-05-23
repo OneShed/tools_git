@@ -43,5 +43,8 @@ git branch -f master
 echo 'Pushing master to scm_repo'
 git push -f $REL/$repo master
 
+# Set sync status against master 
+set_sync.pl --repo "${PWD}/${repo}" --verbose --tag_impl "${TAG}"
+
 echo
 echo "$(basename $0): All done"

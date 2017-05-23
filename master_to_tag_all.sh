@@ -57,6 +57,10 @@ for dir in $(find -maxdepth 2 -type d | egrep -v './PROD|./CFM_TEST'); do
             fi
 
         done
+
+        # Set sync status against master
+        set_sync.pl --repo "${PWD}" --verbose --tag_impl "${TAG}"
+
         cd $repos_dir
     fi
 done
