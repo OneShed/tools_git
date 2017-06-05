@@ -48,6 +48,9 @@ for dir in $(find -maxdepth 2 -type d | egrep -v './PROD|./CFM_TEST'); do
                     repo=$(echo $repo | sed -e 's/^\.\///' -e 's/^.*\///')
                     git push -f $REL/$repo master
 
+                    # Set sync status against master
+                    set_sync.pl --repo "${PWD}" --verbose --tag_impl "${TAG}"
+
                     break
                 else
                     echo "$(basename $0): $TAG_PREPROD exists => nothing done."
@@ -57,9 +60,6 @@ for dir in $(find -maxdepth 2 -type d | egrep -v './PROD|./CFM_TEST'); do
             fi
 
         done
-
-        # Set sync status against master
-        set_sync.pl --repo "${PWD}" --verbose --tag_impl "${TAG}"
 
         cd $repos_dir
     fi

@@ -100,5 +100,5 @@ if( $rel_tag_latest ) {
     print $rel_tag_latest;
 }
 else {
-    exit 1;
+    exit 1
 }
