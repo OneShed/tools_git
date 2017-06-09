@@ -8,6 +8,8 @@
 # If merge conflict, ask user to resolve it.
 #
 # To be run within the root directory of git repos to-be-merged.
+# Note that the script will not create new commits, but will prompt user to do
+# so.
 
 # Example: $0 CBLR1720 REPO1 REPO2 # REPO1 and REPO2 will be skipped
 
@@ -77,7 +79,13 @@ for repo in ${repos[*]}; do
 		if [[ $branch != 'master' && $branch != "${CYCLE_BRANCH}" && $branch != "_closed$" ]]; then
 			echo "Merging master to $branch."
 			git checkout $branch
-			merge_branch master
+            out=$(merge_branch master --no-ff)
+            echo $out
+
+            if [[ "${out}" == *stopped* ]]; then
+                exit 1
+            fi
+
 		fi
 	done
 	cd ..
