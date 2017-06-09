@@ -37,14 +37,17 @@ repos=$( $DIR/git_branches_all.sh | grep -e "${CYCLE_BRANCH} "  \
 merge_branch()
 {
 	branch_to_merge="${1:-}"
+    shift
+	params="${*:-}"
+
 	if [ -z "${branch_to_merge}" ]; then
 		exit_error "Specify the branch to merge."
 	fi
-	repo="${2:-}"
 
-	if ! git merge --no-commit "${branch_to_merge}" \
+	if ! git merge --no-commit $params "${branch_to_merge}" \
 	       	-m "Merged by $(basename $0)"; then
 
+		echo "Please resolve the merge manually." 2>&1
 		echo "Hint git mergetool, git commit." 2>&1
 		exit 1;
 	fi
