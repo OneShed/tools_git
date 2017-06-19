@@ -15,7 +15,7 @@
 
 set -e
 set -u
-set -x
+#set -x
 
 # source from the script's directory
 source "$(dirname $0)/functions_git"
@@ -25,7 +25,7 @@ CYCLE_BRANCH="devl_${1,,}"
 REPOS_SKIPPED=${*:2}
 
 if [[ ! -n $REPOS_SKIPPED ]]; then
-    echo "No repos will be skipped"
+    echo "No repos to be skipped"
 else
     echo "Repo(s) to be skipped: $REPOS_SKIPPED"
 fi
@@ -76,13 +76,14 @@ for repo in ${repos[*]}; do
 	branches=$(branches_all)
 
 	for branch in ${branches[*]}; do
-		if [[ $branch != 'master' && $branch != "${CYCLE_BRANCH}" && $branch != "_closed$" ]]; then
+		if [[ $branch != 'master' && $branch != "${CYCLE_BRANCH}" && $branch != *_closed ]]; then
 			echo "Merging master to $branch."
 			git checkout $branch
             out=$(merge_branch master --no-ff)
             echo $out
 
             if [[ "${out}" == *stopped* ]]; then
+                echo 'Stopping'
                 exit 1
             fi
 
