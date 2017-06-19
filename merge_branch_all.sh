@@ -58,13 +58,13 @@ merge_branch()
 # return true if branch belongs to live cycle, false otherwise.
 is_live() {
 
-    cycle="${1}"
+    cycle_branch="${1}"
 
     live_cycles=$($DIR/live_cycles_amadeus.pl)
 
     for lc in ${live_cycles}; do
         branch=devl_${lc,,}
-        if [[ "$branch" == "$cycle" ]]; then
+        if [[ "$branch" == "$cycle_branch" ]]; then
             return
         fi
     done
