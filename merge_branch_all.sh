@@ -55,6 +55,22 @@ merge_branch()
 	fi
 }
 
+# return true if branch belongs to live cycle, false otherwise.
+is_live() {
+
+    cycle="${1}"
+
+    live_cycles=$($DIR/live_cycles_amadeus.pl)
+
+    for lc in ${live_cycles}; do
+        branch=devl_${lc,,}
+        if [[ "$branch" == "$cycle" ]]; then
+            return
+        fi
+    done
+    return 1
+}
+
 for repo in ${repos[*]}; do
 	cd $repo
 
@@ -77,6 +93,11 @@ for repo in ${repos[*]}; do
 
 	for branch in ${branches[*]}; do
 		if [[ $branch != 'master' && $branch != "${CYCLE_BRANCH}" && $branch != *_closed ]]; then
+
+            if ! is_live $branch; then
+                continue
+            fi
+
 			echo "Merging master to $branch."
 			git checkout $branch
             out=$(merge_branch master --no-ff)
