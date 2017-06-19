@@ -34,25 +34,25 @@ DIR="$(dirname $0)"
 
 # Repos with $CYCLE_BRANCH
 repos=$( $DIR/git_branches_all.sh | grep -e "${CYCLE_BRANCH} "  \
-	-e "${CYCLE_BRANCH}$" | awk '{print $1}')
+    -e "${CYCLE_BRANCH}$" | awk '{print $1}')
 
 merge_branch()
 {
-	branch_to_merge="${1:-}"
+    branch_to_merge="${1:-}"
     shift
-	params="${*:-}"
+    params="${*:-}"
 
-	if [ -z "${branch_to_merge}" ]; then
-		exit_error "Specify the branch to merge."
-	fi
+    if [ -z "${branch_to_merge}" ]; then
+        exit_error "Specify the branch to merge."
+    fi
 
-	if ! git merge --no-commit $params "${branch_to_merge}" \
-	       	-m "Merged by $(basename $0)"; then
+    if ! git merge $params "${branch_to_merge}" \
+        -m "Merged by $(basename $0)"; then
 
-		echo "Please resolve the merge manually." 2>&1
-		echo "Hint git mergetool, git commit." 2>&1
-		exit 1;
-	fi
+    echo "Please resolve the merge manually." 2>&1
+    echo "Hint git mergetool, git commit." 2>&1
+    exit 1;
+fi
 }
 
 # return true if branch belongs to live cycle, false otherwise.
@@ -72,34 +72,39 @@ is_live() {
 }
 
 for repo in ${repos[*]}; do
-	cd $repo
+    cd $repo
 
     if [[ "${REPOS_SKIPPED[*]}" =~ "$repo" ]]; then
         echo "Skipping repo $repo"
         continue
     fi
 
-	# merge $CYCLE_BRANCH to master first
-	echo "Merging ${CYCLE_BRANCH} to master in repo ${repo}."
-	git checkout master
-	merge_branch "${CYCLE_BRANCH}"
+    # merge $CYCLE_BRANCH to master first
+    echo "Merging ${CYCLE_BRANCH} to master in repo ${repo}."
+    git checkout master
+    out=$(merge_branch "${CYCLE_BRANCH}" --no-commit)
+    echo $out
 
-	# rename the merged branch to $branch_closed
-	echo "Renaming ${CYCLE_BRANCH} to ${CYCLE_BRANCH}_closed."
-	git branch -m "${CYCLE_BRANCH}" "${CYCLE_BRANCH}"_closed
+    if [[ "${out}" == *stopped* ]]; then
+        echo 'Stopping'
+        exit 1
+    fi
+    # rename the merged branch to $branch_closed
+    echo "Renaming ${CYCLE_BRANCH} to ${CYCLE_BRANCH}_closed."
+    git branch -m "${CYCLE_BRANCH}" "${CYCLE_BRANCH}"_closed
 
-	# merge master to other cycle's branches
-	branches=$(branches_all)
+    # merge master to other cycle's branches
+    branches=$(branches_all)
 
-	for branch in ${branches[*]}; do
-		if [[ $branch != 'master' && $branch != "${CYCLE_BRANCH}" && $branch != *_closed ]]; then
+    for branch in ${branches[*]}; do
+        if [[ $branch != 'master' && $branch != "${CYCLE_BRANCH}" && $branch != *_closed ]]; then
 
             if ! is_live $branch; then
                 continue
             fi
 
-			echo "Merging master to $branch."
-			git checkout $branch
+            echo "Merging master to $branch."
+            git checkout $branch
             out=$(merge_branch master --no-ff)
             echo $out
 
@@ -108,9 +113,9 @@ for repo in ${repos[*]}; do
                 exit 1
             fi
 
-		fi
-	done
-	cd ..
+        fi
+    done
+    cd ..
 done
 
 echo "$(basename $0): All done"
