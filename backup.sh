@@ -23,7 +23,6 @@ PATH=/bin:/usr/bin
 # What to backup
 # vmdevcfm specific stuff
 GIT_REPOS="/local/git"
-JENKINS_HOME="/local/jenkins"
 GIT_SCM_REPOS="/local/git/repos/"
 GIT_SCM="/local/git/scm/"
 LOCAL_PUB="/local/pub"
@@ -163,14 +162,6 @@ mkdir -p $dst
 echo "Content of $LOCAL_PUB will be rsync-ed to $dst"
 if ! rsync -av $LOCAL_PUB/ $dst; then
     log_error "Failed to backup $LOCAL_PUB"
-fi
-echo
-
-dst="$backup_dir/jenkins_home"
-mkdir -p $dst
-echo "Content of $JENKINS_HOME will be rsync-ed to $dst"
-if ! rsync -av $JENKINS_HOME/ $dst; then
-    log_error "Failed to backup $JENKINS_HOME"
 fi
 echo
 
