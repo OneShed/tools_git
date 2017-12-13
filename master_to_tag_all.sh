@@ -42,8 +42,7 @@ for dir in $(find -maxdepth 2 -type d | egrep -v './PROD|./CFM_TEST'); do
                 echo Repo: $dir
                 echo "--------------"
                 if [[ "${TAG}" == *PREPROD || $(has_preprod) != '1' ]]; then
-                    git checkout ${TAG}
-                    git branch -f master
+                    git branch -f master ${TAG}
                     echo 'Pushing master to scm_repo'
                     repo=$(echo $repo | sed -e 's/^\.\///' -e 's/^.*\///')
                     git push -f $REL/$repo master

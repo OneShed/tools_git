@@ -41,8 +41,7 @@ fi
 
 REPO_NAME="${repo##*\/}"
 
-git checkout ${TAG}
-git branch -f master
+git branch -f master ${TAG}
 echo 'Pushing master to scm_repo'
 git push -f $REL/$REPO_NAME master
 
