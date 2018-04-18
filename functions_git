@@ -39,3 +39,34 @@ branches_all() # {{{
 	done
 	echo "${BRANCHES[*]}"
 } # }}}
+
+tag_local_exists() { # {{{
+
+    tag_given=$1
+
+    tags=$(git tag)
+
+    for tag in ${tags[*]}; do
+        echo $tag
+        if [[ "${tag_given}" == "${tag}" ]]; then 
+            return
+        fi
+    done
+    return 1
+} # }}}
+
+tag_remote_exists() { # {{{
+
+    tag_given=$1
+    remote=$2
+
+    tags=$(git ls-remote $remote | grep refs/tags)
+
+    for tag in ${tags[*]}; do
+        echo $tag
+        if [[ "${tag}" == "refs/tags/${tag_given}" ]]; then 
+            return
+        fi
+    done
+    return 1
+} # }}}
