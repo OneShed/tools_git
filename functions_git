@@ -47,7 +47,6 @@ tag_local_exists() { # {{{
     tags=$(git tag)
 
     for tag in ${tags[*]}; do
-        echo $tag
         if [[ "${tag_given}" == "${tag}" ]]; then 
             return
         fi
@@ -63,7 +62,6 @@ tag_remote_exists() { # {{{
     tags=$(git ls-remote $remote | grep refs/tags)
 
     for tag in ${tags[*]}; do
-        echo $tag
         if [[ "${tag}" == "refs/tags/${tag_given}" ]]; then 
             return
         fi
