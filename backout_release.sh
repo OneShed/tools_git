@@ -102,7 +102,7 @@ for repo in $($repos_cmd); do
         fi
         OS_NAME=${OS:-UNIX}
 
-        tar="${release_area}/BAT_${CYCLE}/${CYCLE}-${APPLICATION}-${OS_NAME}-Release_${RELEASE}.tar.gz"
+        tar="${release_area}/BAT_${CYCLE}/${APPLICATION}/${CYCLE}-${APPLICATION}-${OS_NAME}-Release_${RELEASE}.tar.gz"
 
         if [[ -f "${tar}" ]]; then
             echo Tar exists in primary release are, removing it
