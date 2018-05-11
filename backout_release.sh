@@ -97,7 +97,7 @@ for repo in $($repos_cmd); do
         . /tmp/rel_areas
 
         OS=''
-        if [[ ${APPLICATION} == *NT* ]]; then
+        if [[ ${APPLICATION} == *-NT* ]]; then
             OS=NT
         fi
         OS_NAME=${OS:-UNIX}
