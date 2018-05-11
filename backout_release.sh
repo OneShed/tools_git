@@ -43,7 +43,7 @@ prev_rel() { # {{{
     if [[ "${minor}" == "00" ]]; then
         lower_major=$((--major))
         echo "${CYCLE}_${APPLICATION}_${lower_major}.00"
-    # fix
+        # fix
     else
         lower_minor=$((--minor))
         # add 0 if minor < 10 to have a 2 digit number
@@ -56,64 +56,77 @@ prev_rel() { # {{{
 
 for repo in $($repos_cmd); do
 
-    cd $REPOS_LOCAL/$repo
     REL=https://github.deutsche-boerse.de/rel/$repo
 
-    # rel tag
-    if tag_local_exists $REL_TAG; then
-        echo $REL_TAG exists in local repo, removing it
-        $debug git tag -d $REL_TAG
+    # if repo with dependency check for the release tag
+    if [[ -d $REPOS_LOCAL/$repo ]]; then
+        cd $REPOS_LOCAL/$repo
 
-        prev_rel=$(prev_rel)
+        if ! tag_local_exists $REL_TAG; then
+            if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
+                cd $REPOS_LOCAL/$CYCLE/$repo 
 
-        # local
-        if tag_local_exists ${prev_rel}; then
-
-            echo "Previous release exists in the local repo: ${prev_rel}"
-            $debug git checkout ${prev_rel}
-
-            echo $CYCLE_TAG exists in local repo, update it
-            $debug git tag  -f $CYCLE_TAG
-            $debug git push -f $REL $CYCLE_TAG
-        else
-            echo "Previous release does not exist, removing tag $CYCLE_TAG}"
-            $debug git tag -d $CYCLE_TAG
-            $debug git push --delete $REL $CYCLE_TAG
+                if ! tag_local_exists $REL_TAG; then
+                    exit_error $REL_TAG does not exist in ${PWD}
+                fi
+            else
+                exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
+            fi
         fi
-
-        # remote
-        if tag_remote_exists $REL_TAG $REL; then
-            echo $REL_TAG exists in $REL, removing it
-            $debug git push --delete $REL $REL_TAG
-        else
-            exit_error $REL_TAG does not exist in $REL
-        fi
-
-        # set the sync status
-        $debug set_sync.pl --repo "${PWD}" --verbose --tag_impl PROD
-
-        # remove tar from release area
-        cat $REPOS_CONF | grep release_area | sed 's/ //g' > /tmp/rel_areas
-        . /tmp/rel_areas
-
-        OS=''
-        if [[ ${APPLICATION} == *-NT* ]]; then
-            OS=NT
-        fi
-        OS_NAME=${OS:-UNIX}
-
-        tar="${release_area}/BAT_${CYCLE}/${APPLICATION}/${CYCLE}-${APPLICATION}-${OS_NAME}-Release_${RELEASE}.tar.gz"
-
-        if [[ -f "${tar}" ]]; then
-            echo Tar exists in primary release are, removing it
-            $debug rm -rf $tar
-        else
-            echo $tar does not exist, nothing to remove
-        fi
-
-    else
-        exit_error $REL_TAG does not exist
     fi
+
+    # rel tag
+    echo $REL_TAG exists in local repo ${PWD}, removing it
+    $debug git tag -d $REL_TAG
+
+    prev_rel=$(prev_rel)
+
+    # local
+    if tag_local_exists ${prev_rel}; then
+
+        echo "Previous release exists in the local repo: ${prev_rel}"
+        $debug git checkout ${prev_rel}
+
+        echo $CYCLE_TAG exists in local repo, update it
+        $debug git tag  -f $CYCLE_TAG
+        $debug git push -f $REL $CYCLE_TAG
+    else
+        echo "Previous release does not exist, removing tag $CYCLE_TAG}"
+        $debug git tag -d $CYCLE_TAG
+        $debug git push --delete $REL $CYCLE_TAG
+    fi
+
+    # remote
+    if tag_remote_exists $REL_TAG $REL; then
+        echo $REL_TAG exists in $REL, removing it
+        $debug git push --delete $REL $REL_TAG
+    else
+        exit_error $REL_TAG does not exist in $REL
+    fi
+
+    # set the sync status
+    $debug set_sync.pl --repo "${PWD}" --verbose --tag_impl PROD
+
+    # remove tar from release area
+    cat $REPOS_CONF | grep release_area | sed 's/ //g' > /tmp/rel_areas
+    . /tmp/rel_areas
+
+    OS=''
+    if [[ ${APPLICATION} == *-NT* ]]; then
+        OS=NT
+    fi
+    OS_NAME=${OS:-UNIX}
+
+    tar="${release_area}/BAT_${CYCLE}/${APPLICATION}/${CYCLE}-${APPLICATION}-${OS_NAME}-Release_${RELEASE}.tar.gz"
+
+    if [[ -f "${tar}" ]]; then
+        echo Tar exists in primary release area, removing it
+        $debug rm -rf $tar
+    else
+        echo $tar does not exist, nothing to remove
+    fi
+
+    exit_error $REL_TAG does not exist
 
 done
 
