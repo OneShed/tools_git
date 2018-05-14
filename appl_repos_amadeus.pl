@@ -3,7 +3,6 @@
 # Print all repos of the APPLICATION as set in AMADEUS_XML
 
 use Local::AmadeusXML;
-use Data::Dumper;
 
 my $APPLICATION = $ARGV[0];
 
