@@ -24,6 +24,8 @@ my $application = $amadeus_extract->lookup_application( $appl, $os );
 my @repos = $application->repos;
 
 for my $repo( @repos ) {
-    $repo =~ s/.*\///;
+    # dev/cs.am
+    # dev-confidential/cs.am
+    #$repo =~ s/.*\///;
     print($repo);
 }

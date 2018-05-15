@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -u
-# set -x
+#set -x
 
 # Compare the repo definition in jenkins to the one in Amadeus.xml 
 
@@ -30,7 +30,7 @@ for file in $(find -maxdepth 2 | grep config.xml | egrep -v _pipe); do
                 f=${file%\/config.xml*}
                 appl=${f#\.\/}
 
-                echo "$grepped" | perl -pe 's/.*--url//' | perl -pe 's/.*github.deutsche-boerse.de\/dev.*?\///' | awk '{print $1}' | tee /tmp/repo >/dev/null
+                echo "$grepped" | perl -pe 's/.*--url//' | perl -pe 's/.*github.deutsche-boerse.de\///' | awk '{print $1}' | tee /tmp/repo >/dev/null
                 repo=$(cat /tmp/repo)
 
                 set +e
@@ -51,4 +51,3 @@ for file in $(find -maxdepth 2 | grep config.xml | egrep -v _pipe); do
         fi
 
 done
-

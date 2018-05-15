@@ -56,6 +56,9 @@ prev_rel() { # {{{
 
 for repo in $($repos_cmd); do
 
+    # dev/cs.am -> cs.am
+    repo=${repo#*\/}
+
     REL=https://github.deutsche-boerse.de/rel/$repo
 
     # if repo with dependency check for the release tag
