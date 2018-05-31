@@ -11,6 +11,8 @@
 ## 3/ Re-run the sync check on the application.
 ## 4/ Remove tar from release area
 
+# TODO: branch master has to be rebased too unless there is PREPROD already 
+
 set -e
 set -u
 # set -x
