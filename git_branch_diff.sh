@@ -11,7 +11,7 @@ set -u
 CYCLE=${1}
 BRANCH=devl_${1,,}
 
-source "$(dirname $0)/functions_git"
+source /local/git/scm/tools_git/functions_git
 
 for repo in $(ls); do
     if [[ ! ${repo} =~ ".dtd" && ! ${repo} =~ ".sh" ]]; then

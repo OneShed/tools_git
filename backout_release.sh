@@ -131,8 +131,6 @@ for repo in $($repos_cmd); do
         echo $tar does not exist, nothing to remove
     fi
 
-    exit_error $REL_TAG does not exist
-
 done
 
 echo
