@@ -15,7 +15,7 @@
 
 set -e
 set -u
-# set -x
+#set -x
 
 dirname=$(dirname $0)
 . $dirname/functions_git
@@ -113,16 +113,22 @@ for repo in $($repos_cmd); do
     $debug set_sync.pl --repo "${PWD}" --verbose --tag_impl PROD
 
     # remove tar from release area
+    # e.g UNIX: //net/vmdevcfmrel/local5/packages/BAT_CBLGFF_180703/CSE/CBLGFF_180703-CSE-UNIX-Release_1.00.tar.gz
+    # e.g NT:   //net/vmdevcfmrel/local/packages/BAT_CBLS1750/RTS/CBLS1750-RTS-NT-Release_1.00.tar.gz
+
     cat $REPOS_CONF | grep release_area | sed 's/ //g' > /tmp/rel_areas
     . /tmp/rel_areas
 
     OS=''
-    if [[ ${APPLICATION} == *-NT* ]]; then
-        OS=NT
+    tar=''
+    if [[ ${APPLICATION} != *-NT* ]]; then
+        OS=UNIX
+        tar="${release_area}/BAT_${CYCLE}/${APPLICATION}/${CYCLE}-${APPLICATION}-${OS}-Release_${RELEASE}.tar.gz"
+    else
+        release_area_nt=$(echo $release_area_nt | sed 's/\/\//\/net\//')
+        APP_NAME=${APPLICATION%%-NT}
+        tar="${release_area_nt}/BAT_${CYCLE}/${APP_NAME}/${CYCLE}-${APPLICATION}-Release_${RELEASE}.tar.gz"
     fi
-    OS_NAME=${OS:-UNIX}
-
-    tar="${release_area}/BAT_${CYCLE}/${APPLICATION}/${CYCLE}-${APPLICATION}-${OS_NAME}-Release_${RELEASE}.tar.gz"
 
     if [[ -f "${tar}" ]]; then
         echo Tar exists in primary release area, removing it
