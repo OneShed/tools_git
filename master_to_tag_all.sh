@@ -29,7 +29,11 @@ has_preprod() {
     fi
 }
 
-for dir in $(find -maxdepth 2 -type d | egrep -v './PROD|./CFM_TEST'); do
+# ignore the unrelated cycle directories 
+repos=$(find -maxdepth 1 -type d | egrep '[a-z]')
+repos=( "$repos[@]" "${TAG}" )
+
+for dir in ${repos[*]}; do 
 
     if [[ -e "${dir}/.git" ]] ; then
 
