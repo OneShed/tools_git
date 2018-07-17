@@ -31,7 +31,8 @@ has_preprod() {
 
 # ignore the unrelated cycle directories 
 repos=$(find -maxdepth 1 -type d | egrep '[a-z]')
-repos=( "$repos[@]" "${TAG}" )
+tag_repos=$(find $TAG -maxdepth 1 -type d | egrep -v ^${TAG}$)
+repos=( "${repos[*]}" "${tag_repos[*]}" )
 
 for dir in ${repos[*]}; do 
 
