@@ -63,20 +63,20 @@ for repo in $($repos_cmd); do
 
     REL=https://github.deutsche-boerse.de/rel/$repo
 
-    # if repo with dependency check for the release tag
+    # check for the release tag in regular repo then in cycle repo
     if [[ -d $REPOS_LOCAL/$repo ]]; then
         cd $REPOS_LOCAL/$repo
-
         if ! tag_local_exists $REL_TAG; then
-            if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
-                cd $REPOS_LOCAL/$CYCLE/$repo 
-
-                if ! tag_local_exists $REL_TAG; then
-                    exit_error $REL_TAG does not exist in ${PWD}
-                fi
-            else
-                exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
+            exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
+        fi
+    else
+        if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
+            cd $REPOS_LOCAL/$CYCLE/$repo 
+            if ! tag_local_exists $REL_TAG; then
+                exit_error $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
             fi
+        else
+            exit_error $REL_TAG does not exist in ${PWD}
         fi
     fi
 
