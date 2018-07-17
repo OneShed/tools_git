@@ -8,7 +8,12 @@ set -u
 TAG=$1
 repos_dir=${PWD}
 
-for dir in $(find -maxdepth 2); do
+# ignore directories of unrelated cycle
+repos_nodep=$(find -maxdepth 1 -type d | egrep '[a-z]')
+tag_repos=$(find $TAG -maxdepth 1 -type d | egrep -v ^${TAG}$)
+repos=( "${repos_nodep[*]}" "${tag_repos[*]}" )
+
+for dir in ${repos[*]}; do
 
 	if [[ -e "${dir}/.git" ]]; then
 
