@@ -76,7 +76,7 @@ for repo in $($repos_cmd); do
                 exit_error $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
             fi
         else
-            exit_error $REL_TAG does not exist in ${PWD}
+            exit_error $repo does not exist in ${PWD}
         fi
     fi
 
