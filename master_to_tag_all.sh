@@ -8,6 +8,7 @@ set -e
 set -u
 
 TAG=$1
+RELEASE_TAG="${2:-}"
 repos_dir=${PWD}
 TAG_PREPROD="${TAG}_PREPROD"
 REL=https://github.deutsche-boerse.de/rel
@@ -29,10 +30,18 @@ has_preprod() {
     fi
 }
 
-# ignore the unrelated cycle directories 
-repos=$(find -maxdepth 1 -type d | egrep '[a-z]')
-tag_repos=$(find $TAG -maxdepth 1 -type d | egrep -v ^${TAG}$)
-repos=( "${repos[*]}" "${tag_repos[*]}" )
+repos=
+if [[ ! -z $RELEASE_TAG ]]; then
+    echo Searching for release tag $TAG
+    repos=$(find -maxdepth 2 -type d | egrep -v './PROD|./CFM_TEST');
+else
+
+    # ignore directories of unrelated cycle
+    echo Searching for cycle tag $TAG
+    repos_nodep=$(find -maxdepth 1 -type d | egrep '[a-z]')
+    tag_repos=$(find $TAG -maxdepth 1 -type d | egrep -v ^${TAG}$ || true)
+    repos=( "${repos_nodep[*]}" "${tag_repos[*]}" )
+fi
 
 for dir in ${repos[*]}; do 
 
