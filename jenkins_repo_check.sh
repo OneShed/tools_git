@@ -11,7 +11,7 @@ dirname="${PWD}"
 
 cd /local/jenkins/jobs
 
-for file in $(find -maxdepth 2 | grep config.xml | egrep -v _pipe); do
+for file in $(find -maxdepth 2 | grep config.xml | egrep -v _pipe | egrep -v emergency | egrep -v WEEKLY_MF_IMPORT | egrep -v '[[:lower:]]\/*\/'); do
         set +u
         set +e
         grepped=$(grep '\-\-url' $file)
