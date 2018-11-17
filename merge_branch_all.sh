@@ -43,7 +43,7 @@ merge_branch()
     params="${*:-}"
 
     if [ -z "${branch_to_merge}" ]; then
-        exit_error "Specify the branch to merge."
+        exit_error "Error: Specify the branch to merge."
     fi
 
     if ! git merge $params "${branch_to_merge}" \
@@ -51,6 +51,7 @@ merge_branch()
 
     echo "Please resolve the merge manually." 2>&1
     echo "Hint git mergetool, git commit." 2>&1
+    echo "Git branch -m $branch ${branch_to_merge}_closed" 
     exit 1;
 fi
 }
