@@ -17,8 +17,9 @@ set -e
 set -u
 #set -x
 
+TOOLS_DIR="/local/git/scm/tools_git"
 # source from the script's directory
-source "$(dirname $0)/functions_git"
+source "$TOOLS_DIR/functions_git"
 
 PARAMS=$*
 CYCLE_BRANCH="devl_${1,,}"
@@ -30,10 +31,8 @@ else
     echo "Repo(s) to be skipped: $REPOS_SKIPPED"
 fi
 
-DIR="$(dirname $0)"
-
 # Repos with $CYCLE_BRANCH
-repos=$( $DIR/git_branches_all.sh | grep -e "${CYCLE_BRANCH} "  \
+repos=$( $TOOLS_DIR/git_branches_all.sh | grep -e "${CYCLE_BRANCH} "  \
     -e "${CYCLE_BRANCH}$" | awk '{print $1}')
 
 merge_branch()
@@ -61,7 +60,7 @@ is_live() {
 
     cycle_branch="${1}"
 
-    live_cycles=$($DIR/live_cycles_amadeus.pl)
+    live_cycles=$($TOOLS_DIR/live_cycles_amadeus.pl)
 
     for lc in ${live_cycles}; do
         branch=devl_${lc,,}
@@ -85,6 +84,10 @@ for repo in ${repos[*]}; do
     git checkout master
     out=$(merge_branch "${CYCLE_BRANCH}" --no-commit)
     echo $out
+
+    # Push the new master to remotes
+    git push origin master
+    git push scm_repo master
 
     if [[ "${out}" == *stopped* ]]; then
         echo 'Stopping'

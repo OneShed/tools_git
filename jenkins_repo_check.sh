@@ -3,7 +3,7 @@
 set -u
 #set -x
 
-# Compare the repo definition in jenkins to the one in Amadeus.xml 
+# Compare the repo definition set in jenkins jobs matches the settings in Amadeus.xml
 
 . functions_git
 
@@ -11,7 +11,7 @@ dirname="${PWD}"
 
 cd /local/jenkins/jobs
 
-for file in $(find -maxdepth 2 | grep config.xml | egrep -v _pipe | egrep -v emergency | egrep -v WEEKLY_MF_IMPORT | egrep -v '[[:lower:]]\/*\/'); do
+for file in $(find -maxdepth 2 | grep config.xml | egrep -v _pipe | egrep -v perl | egrep -v emergency | egrep -v WEEKLY_MF_IMPORT | egrep -v '[[:lower:]]\/*\/'); do
         set +u
         set +e
         grepped=$(grep '\-\-url' $file)
