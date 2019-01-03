@@ -6,7 +6,7 @@
 # Example: $0 AM-UNIX 
 #
 # $SCMLUXADM_TOKEN must be exported (e.g. put it to .bashrc)
-# Create git local git repo
+# Create the local git repo
 # Create remotes (both rel and for to dev)
 # Add empty PEL.xml and README.md
 # Push master to remotes
@@ -45,6 +45,7 @@ git remote add scm_repo $GITHUB/rel/$reponame
 . ${GIT_TOOLS_DIR}/add_readme.sh $repo
 
 cp $GIT_TOOLS_DIR/pel.xml .
+mv pel.xml ${repo}.xml
 git add .
 git commit -a -m 'Initial commit'
 
@@ -54,6 +55,10 @@ echo Make the fork
 "${GIT_TOOLS}/forkGitHubRepo.py" --sourceOrg rel --targetOrg dev "${reponame}" --token "${SCMLUXADM_TOKEN}"
 $GIT_TOOLS/addCollaborator.py $reponame
 git push origin master
+
+echo Add topic 'cfm' on the repos
+$GIT_TOOLS_DIR/addTopic.bash -r "${reponame}" -t cfm -o dev -u scmluxadm -k $SCMLUXADM_TOKEN
+$GIT_TOOLS_DIR/addTopic.bash -r "${reponame}" -t cfm -o rel -u scmluxadm -k $SCMLUXADM_TOKEN
 
 exit_error() # {{{
 {
