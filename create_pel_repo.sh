@@ -28,11 +28,14 @@ reponame="cs.$(echo ${repo,,})-pel"
 # curl -H "Authorization: token $SCMLUXADM_TOKEN" $GITHUB/api/v3/orgs/rel/teams
 # "name": "SCM Luxembourg",
 #    "id": 103,
-teamId=103
+teamId_rel=103
+
+# bash->use '+' for spaces 
+description="EPR+PEL+(Package+Element+List)+for+application+$repo"
 
 echo Create repo in rel
 # create repo in rel, add '-v' for verbose output
-"${GIT_TOOLS}/createGitHubRepo.py" --token "${SCMLUXADM_TOKEN}" --url $GITHUB -o rel -t ${teamId} "${reponame}"
+"${GIT_TOOLS}/createGitHubRepo.py" --token "${SCMLUXADM_TOKEN}" --url $GITHUB -o rel -t ${teamId_rel} "${reponame}" --description $description
 
 echo Setup the local repo
 cd $PEL_DIR
@@ -53,7 +56,7 @@ git push scm_repo master
 
 echo Make the fork
 "${GIT_TOOLS}/forkGitHubRepo.py" --sourceOrg rel --targetOrg dev "${reponame}" --token "${SCMLUXADM_TOKEN}"
-$GIT_TOOLS/addCollaborator.py $reponame
+#$GIT_TOOLS/addCollaborator.py $reponame rel scmluxadm
 git push origin master
 
 echo Add topic 'cfm' on the repos
