@@ -56,7 +56,7 @@ git push scm_repo master
 
 echo Make the fork
 "${GIT_TOOLS}/forkGitHubRepo.py" --sourceOrg rel --targetOrg dev "${reponame}" --token "${SCMLUXADM_TOKEN}"
-#$GIT_TOOLS/addCollaborator.py $reponame rel scmluxadm
+$GIT_TOOLS/addCollaborator.py $reponame dev scmluxadm
 git push origin master
 
 echo Add topic 'cfm' on the repos
