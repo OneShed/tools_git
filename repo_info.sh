@@ -10,6 +10,8 @@ repo=$1
 org=$2
 GIT_TOOLS=/local/git/scm/GIT/svn2git
 
+echo name:$repo
+
 # list the descripton of the repo
 d=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X GET $GITHUB/api/v3/repos/$org/$repo | grep description | head -1 | sed 's/\"description\"://g' | sed 's/\"//g' | sed 's/,//g')
 echo description:$d
