@@ -13,7 +13,8 @@ GIT_TOOLS=/local/git/scm/GIT/svn2git
 echo name:$repo
 
 # list the descripton of the repo
-d=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X GET $GITHUB/api/v3/repos/$org/$repo | grep description | head -1 | sed 's/\"description\"://g' | sed 's/\"//g' | sed 's/,//g')
+d=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X GET $GITHUB/api/v3/repos/$org/$repo | grep description | head -1 | sed 's/\"description\"://g' | sed 's/\"//g' | sed 's/,//g'  |  sed 's/^[ \t]*//;s/[ \t]*$//')
+
 echo description:$d
 
 # topics
@@ -29,23 +30,23 @@ echo topics:$top
 # teams and permissions
 $GIT_TOOLS/repoTeams.py $org $repo
 
-# list all collaborators regardles if org members (see afiliation parameter)
+# list collaborators
 # github3 doesn't implement this yet, use curl instead
-names=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X  \
-    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=direct\
+function get_collaborators {
+collab_names=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X  \
+    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=$affiliation\
     | egrep '"login":' | awk '{print $2}' | sed 's/\"//g' | sed 's/\,//g')
 
-
 admin=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X  \
-    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=direct\
+    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=$affiliation\
     | egrep '"admin":' | sed 's/\"admin\": //' | sed 's/\,//' )
 
 push=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X  \
-    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=direct\
+    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=$affiliation\
     | egrep '"push":'  | sed 's/\"push\": //' | sed 's/\,//')
 
 pull=$(curl -s -i -H "Authorization: token $SCMLUXADM_TOKEN" -X  \
-    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=direct\
+    GET $GITHUB/api/v3/repos/$org/$repo/collaborators?affiliation=$affiliation\
     | egrep '"pull":'  | sed 's/\"pull\": //' | sed 's/\,//')
 
 admin_array=($admin)
@@ -54,7 +55,9 @@ pull_array=($pull)
 
 ## parse the array of <perm>, <true/false>
 counter=0
-for name in ${names[@]}; do
+perms=''
+perms=''
+for name in ${collab_names[@]}; do
 
     admin=$(eval echo "\${admin_array[\$counter]}")
     if [[ $admin == 'true' ]]; then
@@ -67,7 +70,6 @@ for name in ${names[@]}; do
     push=$(eval echo "\${push_array[\$counter]}")
     if [[ $push == 'true' ]]; then
         perm='write'
-        #echo $name,$perm
         perms+=$name,$perm,,
         counter=$((counter+1))
         continue
@@ -77,10 +79,21 @@ for name in ${names[@]}; do
     if [[ $pull == 'true' ]]; then
         perm='read'
         counter=$((counter+1))
-        #echo $name,$perm
         perms+=$name,$perm,,
         continue
     fi
 done
 
-echo collaborators:$perms
+echo collaborators_$affiliation:$perms
+}
+
+# all
+export affiliation='direct'
+get_collaborators
+
+# outside
+export affiliation='outside'
+get_collaborators
+
+
+

@@ -5,4 +5,4 @@ org=$2
 
 # e.g $0 441 dev # cs-ifs-devops
 
-./team_repos.sh $team_id | xargs -i -n 1 bash /local/git/scm/tools_git/repo_info.sh {} $org
+/local/git/scm/tools_git/team_repos.sh $team_id | xargs -i -n 1 bash /local/git/scm/tools_git/repo_info.sh {} $org | tee /tmp/cs_ifs_devops.txt
