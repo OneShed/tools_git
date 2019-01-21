@@ -1,0 +1,290 @@
+#!/usr/bin/perl
+
+# {{{
+
+=head1 NAME
+
+cs_ifs_devops
+
+=head1 SYNOPSIS
+
+cs_ifs_devops
+
+=over
+
+=back
+
+=head1 EXAMPLE
+
+=head1 RETURN VALUE
+
+Return 0 when OK, non-zero value on error
+
+=head1 AUTHOR
+
+Jan Spatina <jan.spatina@deutsche-boerse.com>
+
+=head1 LICENSE
+
+Copyright 2014 Deutsche Boerse Services s.r.o.
+Copyright 2014 Clearstream Services S.A.
+
+=head1 HISTORY
+
+=item 01/21/2019 Jan Spatina Creation
+
+=cut
+
+# }}}
+
+use 5.008;
+use JSON;
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use Data::Dumper;
+
+use Time::Local;
+use Data::Dumper;
+use Getopt::Long;
+use Pod::Usage;
+
+use File::stat;
+use Time::localtime;
+
+# Parse this file to get web output
+use constant REPOS_INFO => '/usr/local/share/sc_ifs_devops.txt';
+
+my $last_update;
+
+# Global vars:
+my $cgi = CGI->new() or throw("Failed to create CGI object");
+my $csv =  $cgi->param('csv');
+
+# Use only positive integer in href '?days=<days>'
+sub assert_arguments # {{{
+{
+    if( ($web_days !~ m/^[0-9]*$/) && !$csv_days ) {
+        print $cgi->header,
+        $cgi->start_html(), # start the HTML
+        $cgi->h1("Wrong value inserted: $web_days, insert positive integer"),
+        $cgi->end_html;
+        exit 1;
+    }
+} # }}}
+
+
+sub lines_to_hash {
+my ( @lines_arr ) = @_;
+    my %data;
+    for my $i (@lines_arr) {
+
+        $i =~ s/^\s+|\s+$//g;
+
+        if($i =~ /^(name:)(.*)$/) {
+            if($2) {
+                $name = $2;
+                next
+            }
+        }
+        if($i =~ /^(description:)(.*)$/)  {
+            if($2) {
+                $data{$name}{'description'} = $2;
+                next
+            }
+        }
+        if($i =~ /^(topics:)(.*)$/)  {
+            if($2) {
+                my $topics= $2;
+                my @topics= split(/,/, $topics);
+                $data{$name}{'topics'} = \@topics;
+                next
+            }
+        }
+        if($i =~ /^(teams:)(.*)$/)  {
+            if($2) {
+                $teams = $2;
+                my @teams; #array of arrays
+                my @teams_u = split(/,,/, $teams);
+
+                $data{$name}{'teams'} = \@teams_u; next
+            }
+        }
+        if($i =~ /^(collaborators_direct:)(.*)$/)  {
+		if($2) {
+                $collaborators_direct= $2;
+                my @collaborators_direct; #array of arrays
+                my @collaborators_direct_u = split(/,,/, $collaborators_direct);
+                $data{$name}{'collaborators_direct'} = \@collaborators_direct_u;
+            }
+        }
+	if($i =~ /^(collaborators_outside:)(.*)$/)  {
+		if($2) {
+                $collaborators_outside= $2;
+                my @collaborators_outside; #array of arrays
+                my @collaborators_outside_u = split(/,,/, $collaborators_outside);
+                $data{$name}{'collaborators_outside'} = \@collaborators_outside_u;
+            }
+        }
+    }
+    return %data;
+    }
+
+sub read_file { # {{{
+    my( $file_name ) = @_;
+
+    open my $file_handle, '<', $file_name  or
+    exit_error("Cannot open file for read $file_name: $!");
+
+    $last_update = ctime(stat($file_handle)->mtime);
+
+    my $file=join "", <$file_handle>;
+
+    close $file_handle or warn "Cannot close file handle after reading";
+    return $file;
+} # }}}
+
+
+# Create the HTTP response
+sub render_page { # {{{
+
+read_file(REPOS_INFO);
+
+# header
+    my $page = <<EOF;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.3/css/jquery.dataTables.min.css">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+<script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<script>
+function days_value() {
+    var days_given=document.getElementById("days").value;
+    var param="?days="+days_given;
+    window.location=param;
+    }
+    </script>
+
+</head>
+
+<body>
+<div class="container">
+<p>
+</br>
+<h2>Repositories of the <a href="https://github.deutsche-boerse.de/orgs/dev/teams/cs-ifs-devops/repositories/" align="right">cs-ifs-devops</a> team.</h2>
+</br>
+<div align="left">
+</div>
+<div align="right">
+</div>
+
+Figures last updated: $last_update</p>
+EOF
+
+# repos table
+
+    $page .= add_tables( );
+
+    $page .= <<'EOF';
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+   $("#issues").DataTable( {"paging": false} );
+}
+);
+
+</body>
+</html>
+EOF
+
+    print $page;
+} # }}}
+
+# Die with $err to stderr.
+sub exit_error { # {{{
+
+    my( $err ) = @_;
+    die( $err );
+} # }}}
+
+sub add_tables {
+    my( @repos ) = @_;
+    my $msg;
+
+    my $lines = read_file(REPOS_INFO);
+    my @lines_arr= split('\n', $lines);
+
+    my %data = lines_to_hash(@lines_arr);
+
+    my $repos;
+    for my $repo( sort keys %data ) { 
+
+	my $description = $data{$repo}{'description'};
+	$description = ($description =~ /^null$/)  ? '' : $description;
+		
+	my $topics='';
+	my @t = @{$data{$repo}{'topics'}};
+	my $topics = join("<br>", @t);
+
+	my @teams = @{$data{$repo}{'teams'}};
+	my $teams = join('<br>', @teams );
+
+	my @collaborators_direct = @{$data{$repo}{'collaborators_direct'}};
+	my $collaborators_direct= join('<br>', @collaborators_direct);
+
+	my @collaborators_outside = @{$data{$repo}{'collaborators_outside'}};
+	my $collaborators_outside = join('<br>', @collaborators_outside);
+
+    	$repos.="<tr><td>$repo</td><td>$description</td><td>$topics</td><td>$teams</td><td>$collaborators_direct</td><td>$collaborators_outside</td></tr>\n";
+}
+
+        my $message = <<'MESSAGE';
+<table class="table table-condensed table-bordered" id="issues">
+<thead>
+    <th>Repo</th>
+    <th>Description</th>
+    <th>Topics</th>
+    <th>Team, permission</th>
+    <th>Collaborator, permission</th>
+    <th>Collaborator EXT, permission</th>
+</thead>
+MESSAGE
+
+        $message .= $repos;
+
+        $message .= <<'MESSAGE';
+<tbody>
+</tbody>
+</table>
+MESSAGE
+
+        $msg .= $message;
+    return $msg;
+}
+
+main();
+sub main { # {{{
+
+    my %issues;
+
+    assert_arguments();
+    print $cgi->header('text/html');
+    render_page( );
+} # }}}
