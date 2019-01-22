@@ -252,7 +252,7 @@ sub add_tables {
 	my @collaborators_outside = @{$data{$repo}{'collaborators_outside'}};
 	my $collaborators_outside = join('<br>', @collaborators_outside);
 
-    	$repos.="<tr><td>$repo</td><td>$description</td><td>$topics</td><td>$teams</td><td>$collaborators_direct</td><td>$collaborators_outside</td></tr>\n";
+    	$repos.="<tr><td><a href=https://github.deutsche-boerse.de/dev/$repo>$repo</a></td><td>$description</td><td>$topics</td><td>$teams</td><td>$collaborators_direct</td><td>$collaborators_outside</td></tr>\n";
 }
 
         my $message = <<'MESSAGE';
