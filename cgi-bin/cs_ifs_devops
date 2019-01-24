@@ -52,7 +52,7 @@ use File::stat;
 use Time::localtime;
 
 # Parse this file to get web output
-use constant REPOS_INFO => '/usr/local/share/sc_ifs_devops.txt';
+use constant REPOS_INFO => '/usr/local/share/cs_ifs_devops.txt';
 
 my $last_update;
 
@@ -72,6 +72,12 @@ sub assert_arguments # {{{
     }
 } # }}}
 
+
+my $lines = read_file(REPOS_INFO);
+my @lines_arr= split('\n', $lines);
+my %data = lines_to_hash(@lines_arr);
+
+my $total = scalar( keys %data );
 
 sub lines_to_hash {
 my ( @lines_arr ) = @_;
@@ -183,14 +189,19 @@ function days_value() {
 <div class="container">
 <p>
 </br>
-<h2>Repositories of the <a href="https://github.deutsche-boerse.de/orgs/dev/teams/cs-ifs-devops/repositories/" align="right">cs-ifs-devops</a> team.</h2>
+<h2>Repositories of the <a href="https://github.deutsche-boerse.de/orgs/dev/teams/cs-ifs-devops/repositories/" align="right">cs-ifs-devops</a> team (total $total repos).</h2>
 </br>
 <div align="left">
 </div>
 <div align="right">
 </div>
 
-Figures last updated: $last_update</p>
+<div align="right">
+<a href="?csv=1" align="right">Download as CSV file</a> (will contain full details)
+</div>
+
+
+Figures last updated (hourly): $last_update</p>
 EOF
 
 # repos table
@@ -224,14 +235,56 @@ sub exit_error { # {{{
     die( $err );
 } # }}}
 
+# Transform the %data hash to cvs string
+sub render_csv { # {{{
+
+    # content
+    my $csv;
+    for my $repo( sort keys %data ) {
+
+	my $description = $data{$repo}{'description'};
+	$description = ($description =~ /^null$/)  ? '' : $description;
+		
+	my $topics='';
+	my @t = @{$data{$repo}{'topics'}};
+	my $topics = join(",", @t);
+
+	my @teams = @{$data{$repo}{'teams'}};
+	my $teams = join(',,', @teams );
+
+	my @collaborators_direct = @{$data{$repo}{'collaborators_direct'}};
+	my $collaborators_direct= join(',,', @collaborators_direct);
+
+	my @collaborators_outside = @{$data{$repo}{'collaborators_outside'}};
+	my $collaborators_outside = join(',,', @collaborators_outside);
+
+	$csv .= "name:$repo\n";
+	$csv .= "description:$description\n";
+	$csv .= "topics:$topics\n";
+	$csv .= "teams:$teams\n";
+	$csv .= "collaborators_direct:$collaborators_direct\n";
+	$csv .= "collaborators_outside,$collaborators_outside\n";
+    }
+
+   #     @repos = sort keys $data{$repo};
+
+   #     my $issue;
+   #     my $table="\Repo:,Description:,Topics:,Team,permission:,Collaborator EXT,permission";
+   #     for my $repo ( sort @repos ) {
+
+   #         $issue_content=$data{$cycle}{$repo};
+   #         $table.="$repo,$issue_content\n";
+   #     }
+   #     $page.=$table;
+   # }
+
+    print $csv;
+
+} # }}}
+
 sub add_tables {
     my( @repos ) = @_;
     my $msg;
-
-    my $lines = read_file(REPOS_INFO);
-    my @lines_arr= split('\n', $lines);
-
-    my %data = lines_to_hash(@lines_arr);
 
     my $repos;
     for my $repo( sort keys %data ) { 
@@ -285,6 +338,18 @@ sub main { # {{{
     my %issues;
 
     assert_arguments();
-    print $cgi->header('text/html');
-    render_page( );
+	
+    if( $csv ) {
+        my $filename = "cs_ifs_devops.csv";
+        my $save_as = "attachment; filename=\"$filename\"" ;
+        print $cgi->header(
+            -type => 'text/csv',
+            -Content_disposition => $save_as,
+        );
+        render_csv( \%data);
+    }
+    else {
+        print $cgi->header('text/html');
+        render_page( %issues );
+    }
 } # }}}
