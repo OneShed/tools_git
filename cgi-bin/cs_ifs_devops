@@ -258,26 +258,14 @@ sub render_csv { # {{{
 	my @collaborators_outside = @{$data{$repo}{'collaborators_outside'}};
 	my $collaborators_outside = join(',,', @collaborators_outside);
 
-	$csv .= "name:$repo\n";
-	$csv .= "description:$description\n";
-	$csv .= "topics:$topics\n";
-	$csv .= "teams:$teams\n";
-	$csv .= "collaborators_direct:$collaborators_direct\n";
-	$csv .= "collaborators_outside,$collaborators_outside\n";
+	$csv .= "name:,$repo\n";
+	$csv .= "description:,$description\n";
+	$csv .= "topics:,$topics\n";
+	$csv .= "teams:,$teams\n";
+	$csv .= "collaborators_direct:,$collaborators_direct\n";
+	$csv .= "collaborators_outside:,$collaborators_outside\n";
     }
-
-   #     @repos = sort keys $data{$repo};
-
-   #     my $issue;
-   #     my $table="\Repo:,Description:,Topics:,Team,permission:,Collaborator EXT,permission";
-   #     for my $repo ( sort @repos ) {
-
-   #         $issue_content=$data{$cycle}{$repo};
-   #         $table.="$repo,$issue_content\n";
-   #     }
-   #     $page.=$table;
-   # }
-
+  
     print $csv;
 
 } # }}}
