@@ -33,7 +33,7 @@ out=$(curl -i -H "Authorization: token $SCMLUXADM_TOKEN" -X GET $GITHUB/api/v3/r
 if [[ -n $out ]]; then
 
     # create repo in rel and add the default CFM team, add '-v' for verbose output
-    "${GIT_TOOLS}/createGitHubRepo.py" --token "${token}" --url $GITHUB_URL -o rel "${repo}" -t ${team_id_rel} --description $description 
+    "${GIT_TOOLS}/createGitHubRepo.py" --private --token "${token}" --url $GITHUB_URL -o rel "${repo}" -t ${team_id_rel} --description $description 
     
     cd /tmp
     # put a README.md inside
