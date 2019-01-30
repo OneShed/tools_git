@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Usage: $0 [<repo_name>]
-# Creates a new PEL repo in rel org and forks it to dev
+# Creates a new build_script repo in rel org and forks it to dev
 #
 # Example: $0 AM-UNIX 
 #
 # $SCMLUXADM_TOKEN must be exported (e.g. put it to .bashrc)
 # Create the local git repo
 # Create remotes (both rel and for to dev)
-# Add empty PEL.xml and README.md
+# Add empty script.sh and README.md
 # Push master to remotes
 
 
@@ -18,39 +18,45 @@ set -u
 
 GIT_TOOLS_DIR=/local/git/scm/tools_git
 GIT_TOOLS=/local/git/scm/GIT/svn2git
-PEL_DIR=/local/git/scm/pckg_list
+BS_DIR=/local/git/scm/build_scripts
 GITHUB=https://github.deutsche-boerse.de
 
 # mandatory
 repo="${1}"
-reponame="cs.$(echo ${repo,,})-pel"
+reponame="cs.$(echo ${repo,,})-build"
 
 # curl -H "Authorization: token $SCMLUXADM_TOKEN" $GITHUB/api/v3/orgs/rel/teams
 # "name": "SCM Luxembourg",
 #    "id": 103,
 teamId_rel=103
-#
-## bash->use '+' for spaces 
-description="EPR+PEL+(Package+Element+List)+for+application+$repo"
+
+# bash->use '+' for spaces 
+description="EPR+build+script+for+application+$repo"
 
 echo Create repo in rel
 # create repo in rel, add '-v' for verbose output
 "${GIT_TOOLS}/createGitHubRepo.py" --token "${SCMLUXADM_TOKEN}" --url $GITHUB -o rel -t ${teamId_rel} "${reponame}" --description $description
 
 echo Setup the local repo
-cd $PEL_DIR
+cd $BS_DIR
 mkdir -p $repo
 cd $repo
 git init
+
+p=$(git remote -v | grep origin || true)
+
+if [[ -n $p ]]; then
+    git remote remove origin
+fi
 git remote add origin $GITHUB/dev/$reponame
 git remote add scm_repo $GITHUB/rel/$reponame
 
 . ${GIT_TOOLS_DIR}/add_readme.sh $repo
 
-cp $GIT_TOOLS_DIR/pel.xml .
-mv pel.xml ${repo}.xml
+#cp $GIT_TOOLS_DIR/script.sh .
+#mv script.sh ${repo}.sh
 git add .
-git commit -a -m 'Initial commit'
+git commit -a -m 'Add README.md'
 
 git push scm_repo master
 

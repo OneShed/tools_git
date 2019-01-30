@@ -3,8 +3,7 @@
 set -e
 set -u
 
-repolow=cs.${repo,,}-pel
-echo "# $repolow" > README.md
+echo "# $reponame" > README.md
 echo "Updates to be done on branch ***devl_\<cycle\>*** e.g ***devl_cblr...***" >> README.md
 echo "## wiki" >> README.md
 echo https://github.deutsche-boerse.de/dev/cs.cfm_documents/blob/master/Update_build_or_pel.md  >> README.md
