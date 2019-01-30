@@ -63,6 +63,9 @@ echo Add topic 'cfm' on the repos
 $GIT_TOOLS_DIR/addTopic.bash -r "${reponame}" -t cfm -o dev -u scmluxadm -k $SCMLUXADM_TOKEN
 $GIT_TOOLS_DIR/addTopic.bash -r "${reponame}" -t cfm -o rel -u scmluxadm -k $SCMLUXADM_TOKEN
 
+echo Add webhook
+$GIT_TOOLS_DIR/add_hook.sh $reponame
+
 exit_error() # {{{
 {
 	echo "$(basename $0): ${1:-"Unknown Error"}" 1>&2

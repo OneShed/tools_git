@@ -6,10 +6,10 @@ set -u
 
 # in all repos, push master to origin
 
-cd /local/git/scm/pckg_list
+cd /local/git/scm/build_scripts
 URL=https://github.deutsche-boerse.de
 
-for repo in $(ls); do
+for repo in $(ls | egrep -v OBSOLETE); do
     if [[ $repo != 'PckgElmnt.dtd' && ! ${repo} =~ ".sh" ]]; then
         echo $repo;
         cd $repo;
