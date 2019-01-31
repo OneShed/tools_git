@@ -54,7 +54,7 @@ git remote add scm_repo $GITHUB/rel/$reponame
 . ${GIT_TOOLS_DIR}/add_readme.sh $repo
 
 cp $GIT_TOOLS_DIR/script.sh .
-mv script.sh ${repo}.sh
+mv script.sh ${repo,,}.sh
 git add .
 git commit -a -m 'Add README.md'
 
