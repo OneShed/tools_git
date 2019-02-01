@@ -73,6 +73,9 @@ $GIT_TOOLS_DIR/addTopic.bash -r "${reponame}" -t cfm -o rel -u scmluxadm -k $SCM
 echo Add the webhook
 $GIT_TOOLS_DIR/add_hook.sh $reponame
 
+echo Lock master
+$GIT_TOOLS_DIR/lock_branch.sh $reponame master 
+
 exit_error() # {{{
 {
 	echo "$(basename $0): ${1:-"Unknown Error"}" 1>&2
