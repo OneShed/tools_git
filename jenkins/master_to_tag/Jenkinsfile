@@ -1,0 +1,24 @@
+String tag = "${TAG}".trim()
+String release_tag =  "${is_release_tag}".trim()
+
+currentBuild.displayName="${tag}"
+
+stage("Merge $tag to master") {
+    node('master') {
+        sh script: """ 
+            cd /local/git/repos
+            ./master_to_tag_all.sh "${tag}" "${release_tag}"
+        """
+        
+        // notify Slack
+        String msg="Just merged tag ${tag} to master in Github rel organization:\n"
+        fileName='/tmp/repos_merged.txt'
+        def lines = new File(fileName)
+    
+        for (line in lines) {
+            String repo = line.replaceAll("^.*/","")
+            msg+="<https://github.deutsche-boerse.de/dev/${repo}|dev/${repo}>\n"
+        }
+        build job: "notify_slack", parameters: [ string(name: 'message', value: "${msg}") ]
+    }
+}

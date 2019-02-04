@@ -13,6 +13,10 @@ repos_dir=${PWD}
 TAG_PREPROD="${TAG}_PREPROD"
 REL=https://github.deutsche-boerse.de/rel
 
+# Create the list just for the Slack notification job
+REPOS_MERGED=/tmp/repos_merged.txt
+rm -rf $REPOS_MERGED
+
 preprods=()
 # Return 1 if PREPROD exists -> no move of master should be done.
 has_preprod() {
@@ -63,6 +67,9 @@ for dir in ${repos[*]}; do
 
                     # Set sync status against master
                     set_sync.pl --repo "${PWD}" --verbose --tag_impl "${TAG}"
+
+                    # Create the list just for the Slack notification job
+                    echo $repo >> $REPOS_MERGED
 
                     break
                 else
