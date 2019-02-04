@@ -1,0 +1,25 @@
+node {
+    
+    String msg = "${params.message}".trim()
+    
+    try { //generic webhook cause
+    ref
+    pusher
+    repo_full_name
+    } catch (Exception e) {
+        print('Not a generic cause, just send a text message')
+        if("${msg}" != "") {
+            slackSend (color: '#36A64F', message: "${msg}")
+            currentBuild.displayName="Message sent"
+        }
+        else {
+            currentBuild.displayName="No message sent"
+        }
+        return
+    }
+    
+    ref=ref.replaceAll(".*/","")
+    slackSend (color: '#36A64F', message: "Repo updated: https://github.deutsche-boerse.de/${repo_full_name} by <https://github.deutsche-boerse.de/${pusher}|${pusher}> on ${ref}" )
+    
+    currentBuild.displayName="Update ${repo_full_name}"
+}
