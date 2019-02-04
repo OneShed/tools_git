@@ -11,13 +11,13 @@ stage("Merge $tag to master") {
         """
         
         // notify Slack
-        String msg="Just merged tag ${tag} to master in Github rel organization:\n"
+        String msg="Just merged tag ${tag} to master in Github rel organization for repos:\n"
         fileName='/tmp/repos_merged.txt'
         def lines = new File(fileName)
     
         for (line in lines) {
             String repo = line.replaceAll("^.*/","")
-            msg+="<https://github.deutsche-boerse.de/dev/${repo}|dev/${repo}>\n"
+            msg+="<https://github.deutsche-boerse.de/dev/${repo}|https://github.deutsche-boerse.de/dev/${repo}>\n"
         }
         build job: "notify_slack", parameters: [ string(name: 'message', value: "${msg}") ]
     }
