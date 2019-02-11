@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+set -u
+
+repos=(ifs-digitization-mail-service ifs-digitization-transient-store ifs-digitization-orchestrator ifs-digitization-classification-driver ifs-digitization-classification-service ifs-digitization-ruleengine ifs-digitization-review-dashboard-ui ifs-digitization-taskmgr-api ifs-digitization-taskmgr-sender ifs-digitization-taskmgr-receiver )
+
+for repo in ${repos[*]}; do
+    echo process repo $repo
+    git clone $GITHUB/dev/$repo.git
+    cd $repo
+
+    #    p=$(git remote -v | grep origin_new || true)
+    #
+    #    if [[ -n $p ]]; then
+    #            git remote remove origin_new
+    #        fi
+    #
+    #   git remote remove origin_new
+
+    git remote add origin_new $GITHUB/dev/"${repo}_new.git"
+
+    #push branches
+    b=$(git branch -r | egrep -v 'origin\/master'); for b in ${b[*]}; do branch=$(echo $b | sed 's/origin\///'); echo $branch;git checkout -b $branch $b; git push origin_new $branch ; done
+
+    git push -f origin_new master
+    git push origin_new --tags
+    cd ..
+done
+
