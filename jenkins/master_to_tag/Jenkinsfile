@@ -15,10 +15,18 @@ stage("Merge $tag to master") {
         fileName='/tmp/repos_merged.txt'
         def lines = new File(fileName)
     
+        line_count=0
         for (line in lines) {
             String repo = line.replaceAll("^.*/","")
             msg+="<https://github.deutsche-boerse.de/dev/${repo}|https://github.deutsche-boerse.de/dev/${repo}>\n"
-        }
+            
+            if( line_count > 18 ) { // max 20 lines in Slack
+                build job: "notify_slack", parameters: [ string(name: 'message', value: "${msg}") ]
+                msg="Just merged tag ${tag} to master in Github rel organization for repos:\n"                   
+                line_count=0
+            }
+            line_count++
+        }    
         build job: "notify_slack", parameters: [ string(name: 'message', value: "${msg}") ]
     }
 }
