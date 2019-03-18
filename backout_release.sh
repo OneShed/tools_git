@@ -15,7 +15,7 @@
 
 set -e
 set -u
-#set -x
+set -x
 
 dirname=$(dirname $0)
 . $dirname/functions_git
@@ -67,23 +67,26 @@ for repo in $($repos_cmd); do
     if [[ -d $REPOS_LOCAL/$repo ]]; then
         cd $REPOS_LOCAL/$repo
         if ! tag_local_exists $REL_TAG; then
-            exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
+            echo $REL_TAG does not exist in $REPOS_LOCAL/$repo
+        else
+            # rel tag
+            echo $REL_TAG exists in local repo ${PWD}, removing it
+            $debug git tag -d $REL_TAG
         fi
     else
         if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
             cd $REPOS_LOCAL/$CYCLE/$repo 
             if ! tag_local_exists $REL_TAG; then
-                exit_error $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
+                echo $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
+            else
+                # rel tag
+                echo $REL_TAG exists in local repo ${PWD}, removing it
+                $debug git tag -d $REL_TAG
             fi
         else
             exit_error $repo does not exist in ${PWD}
         fi
     fi
-
-    # rel tag
-    echo $REL_TAG exists in local repo ${PWD}, removing it
-    $debug git tag -d $REL_TAG
-
     prev_rel=$(prev_rel)
 
     # local
