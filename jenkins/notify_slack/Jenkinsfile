@@ -18,8 +18,15 @@ node {
         return
     }
     
-    ref=ref.replaceAll(".*/","")
-    slackSend (color: '#36A64F', message: "Repo updated: https://github.deutsche-boerse.de/${repo_full_name} by <https://github.deutsche-boerse.de/${pusher}|${pusher}> on ${ref}" )
+    // notify only changes on '*-build' and '*-pel' repos
     
-    currentBuild.displayName="Update ${repo_full_name}"
+    if( repo_full_name.endsWith('-build') || repo_full_name.endsWith('-pel') ) {
+        ref=ref.replaceAll(".*/","")
+        slackSend (color: '#36A64F', message: "Repo updated: https://github.deutsche-boerse.de/${repo_full_name} by <https://github.deutsche-boerse.de/${pusher}|${pusher}> on ${ref}" )
+    
+        currentBuild.displayName="Update ${repo_full_name}"
+    }
+    else {
+        currentBuild.displayName="No message sent: update repo ${repo_full_name}"
+    }
 }
