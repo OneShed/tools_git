@@ -15,7 +15,7 @@
 
 set -e
 set -u
-set -x
+#set -x
 
 dirname=$(dirname $0)
 . $dirname/functions_git
