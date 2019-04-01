@@ -14,9 +14,10 @@ stage("Merge $tag to master") {
         String msg="Just merged tag ${tag} to master in Github rel organization for repos:\n"
         fileName='/tmp/repos_merged.txt'
         def lines = new File(fileName)
-    
+        lines = readFile (file: fileName)
         line_count=0
-        for (line in lines) {
+        
+        for (line in lines.readLines()) {
             String repo = line.replaceAll("^.*/","")
             msg+="<https://github.deutsche-boerse.de/dev/${repo}|https://github.deutsche-boerse.de/dev/${repo}>\n"
             
