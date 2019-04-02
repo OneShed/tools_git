@@ -36,11 +36,11 @@ debug=""
 
 prev_rel() { # {{{
 
-    rel=$1
+    relnum=$1
 
     # parse release version to major.minor
-    major=$(echo $1 | sed  's/\..*//')
-    minor=$(echo $1 | sed  's/.*\.//')
+    major=$(echo $relnum | sed  's/\..*//')
+    minor=$(echo $relnum | sed  's/.*\.//')
 
     # full
     if [[ "${minor}" == "00" ]]; then
