@@ -11,8 +11,7 @@
 ## 3/ Re-run the sync check on the application.
 ## 4/ Remove tar from release area
 
-# TODO: branch master has to be rebased too unless there is PREPROD already 
-# The script will not determine previous release (2.00) correctly in scenario: 3.00 backed out, then 4.00 backed out. 
+# TODO: branch master has to be rebased too unless there is PREPROD already
 
 set -e
 set -u
@@ -77,7 +76,7 @@ for repo in $($repos_cmd); do
         fi
     else
         if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
-            cd $REPOS_LOCAL/$CYCLE/$repo 
+            cd $REPOS_LOCAL/$CYCLE/$repo
             if ! tag_local_exists $REL_TAG; then
                 echo $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
             else
@@ -100,7 +99,7 @@ for repo in $($repos_cmd); do
         prev_releases+=($prev_rel)
     done
 
-    for rel in ${prev_releases[*]}; do 
+    for rel in ${prev_releases[*]}; do
 
         tag_release="${CYCLE}_${APPLICATION}_${rel}"
 
