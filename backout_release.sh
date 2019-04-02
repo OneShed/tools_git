@@ -12,6 +12,7 @@
 ## 4/ Remove tar from release area
 
 # TODO: branch master has to be rebased too unless there is PREPROD already 
+# The script will not determine previous release (2.00) correctly in scenario: 3.00 backed out, then 4.00 backed out. 
 
 set -e
 set -u
