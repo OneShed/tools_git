@@ -89,7 +89,42 @@ for repo in $($repos_cmd); do
         fi
     fi
 
-    # check that previous release tag exists and move the cycle tag. I it does
+    ## exit if higher version already exists in SCM repo 
+    latest=$(rel_latest_appl.pl --repo $repo --cycle ${CYCLE} --appl ${APPLICATION} | sed s/^.*_//)
+
+    higher_than() { # {{{
+
+        version=$1 # compare to
+        version_compare=$2
+
+        version_major=$(echo $version | sed  's/\..*//')
+        version_minor=$(echo $version | sed  's/.*\.//')
+
+        version_compare_major=$(echo $version_compare | sed  's/\..*//')
+        version_compare_minor=$(echo $version_compare | sed  's/.*\.//')
+
+        if [[ $version_compare_major > $version_major ]]; then
+            return 0
+        else
+            if [[ $version_compare_major == $version_major ]]; then
+                if [[ $version_compare_minor > $version_minor ]]; then
+                    return 0
+                else
+                    return 1
+                fi
+            else
+                return 1
+            fi
+        fi
+    } # }}}
+
+    if [[ "${latest}" != 'No release tags found' ]]; then
+        if higher_than $RELEASE $latest; then
+            exit_error "Found newer release in rel repo: $latest, nothing to do."
+        fi
+    fi
+
+    # check that previous release tag exists and move the cycle tag. If it does
     # not exit, remove the cycle tag .
     prev_rel=$(prev_rel $RELEASE)
     prev_releases=($prev_rel)
