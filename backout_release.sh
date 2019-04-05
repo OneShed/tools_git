@@ -11,8 +11,7 @@
 ## 3/ Re-run the sync check on the application.
 ## 4/ Remove tar from release area
 
-# TODO: branch master has to be rebased too unless there is PREPROD already 
-# The script will not determine previous release (2.00) correctly in scenario: 3.00 backed out, then 4.00 backed out. 
+# TODO: branch master has to be rebased too unless there is PREPROD already
 
 set -e
 set -u
@@ -33,19 +32,20 @@ REL_TAG="${CYCLE}_${APPLICATION}_${RELEASE}"
 CYCLE_TAG="${CYCLE}"
 repos_cmd="${dirname}/appl_repos_amadeus.pl $APPLICATION"
 
-#debug="echo"
 debug=""
 
 prev_rel() { # {{{
 
+    relnum=$1
+
     # parse release version to major.minor
-    major=$(echo $RELEASE | sed  's/\..*//')
-    minor=$(echo $RELEASE | sed  's/.*\.//')
+    major=$(echo $relnum | sed  's/\..*//')
+    minor=$(echo $relnum | sed  's/.*\.//')
 
     # full
     if [[ "${minor}" == "00" ]]; then
         lower_major=$((--major))
-        echo "${CYCLE}_${APPLICATION}_${lower_major}.00"
+        echo "${lower_major}.00"
         # fix
     else
         lower_minor=$((--minor))
@@ -53,7 +53,7 @@ prev_rel() { # {{{
         if [[ ${#lower_minor} == 1 ]]; then
             lower_minor="0${lower_minor}"
         fi
-        echo "${CYCLE}_${APPLICATION}_${major}.${lower_minor}"
+        echo "${major}.${lower_minor}"
     fi
 } # }}}
 
@@ -68,7 +68,7 @@ for repo in $($repos_cmd); do
     if [[ -d $REPOS_LOCAL/$repo ]]; then
         cd $REPOS_LOCAL/$repo
         if ! tag_local_exists $REL_TAG; then
-            echo $REL_TAG does not exist in $REPOS_LOCAL/$repo
+            exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
         else
             # rel tag
             echo $REL_TAG exists in local repo ${PWD}, removing it
@@ -76,7 +76,7 @@ for repo in $($repos_cmd); do
         fi
     else
         if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
-            cd $REPOS_LOCAL/$CYCLE/$repo 
+            cd $REPOS_LOCAL/$CYCLE/$repo
             if ! tag_local_exists $REL_TAG; then
                 echo $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
             else
@@ -88,29 +88,86 @@ for repo in $($repos_cmd); do
             exit_error $repo does not exist in ${PWD}
         fi
     fi
-    prev_rel=$(prev_rel)
 
-    # local
-    if tag_local_exists ${prev_rel}; then
+    ## exit if higher version already exists in SCM repo 
+    latest=$(rel_latest_appl.pl --repo $repo --cycle ${CYCLE} --appl ${APPLICATION} | sed s/^.*_//)
 
-        echo "Previous release exists in the local repo: ${prev_rel}"
-        $debug git checkout ${prev_rel}
+    higher_than() { # {{{
 
-        echo $CYCLE_TAG exists in local repo, update it
-        $debug git tag  -f $CYCLE_TAG
-        $debug git push -f $REL $CYCLE_TAG
-    else
-        echo "Previous release does not exist, removing tag $CYCLE_TAG}"
-        $debug git tag -d $CYCLE_TAG
-        $debug git push --delete $REL $CYCLE_TAG
+        version=$1 # compare to
+        version_compare=$2
+
+        version_major=$(echo $version | sed  's/\..*//')
+        version_minor=$(echo $version | sed  's/.*\.//')
+
+        version_compare_major=$(echo $version_compare | sed  's/\..*//')
+        version_compare_minor=$(echo $version_compare | sed  's/.*\.//')
+
+        if [[ $version_compare_major > $version_major ]]; then
+            return 0
+        else
+            if [[ $version_compare_major == $version_major ]]; then
+                if [[ $version_compare_minor > $version_minor ]]; then
+                    return 0
+                else
+                    return 1
+                fi
+            else
+                return 1
+            fi
+        fi
+    } # }}}
+
+    if [[ "${latest}" != 'No release tags found' ]]; then
+        if higher_than $RELEASE $latest; then
+            exit_error "Found newer release in rel repo: $latest, nothing to do."
+        fi
     fi
+
+    # check that previous release tag exists and move the cycle tag. If it does
+    # not exit, remove the cycle tag .
+    prev_rel=$(prev_rel $RELEASE)
+    prev_releases=($prev_rel)
+
+    while [[ "${prev_rel}" != '0.00' ]]; do
+        prev_rel=$(prev_rel $prev_rel)
+        prev_releases+=($prev_rel)
+    done
+
+    for rel in ${prev_releases[*]}; do
+
+        tag_release="${CYCLE}_${APPLICATION}_${rel}"
+
+        if tag_local_exists $tag_release; then
+
+            echo "Previous release exists in the local repo: ${tag_release}, check it out"
+            $debug git checkout ${tag_release}
+
+            if tag_local_exists $CYCLE_TAG; then
+                echo $CYCLE_TAG exists in local repo, update it
+
+                $debug git tag  -f $CYCLE_TAG
+                $debug git push -f $REL $CYCLE_TAG
+            else
+                exit_error $CYCLE_TAG does not exist in local repo, something wrong
+            fi
+            break
+        else
+            if [[ "${rel}" == '0.00' ]]; then
+                echo "Previous release does not exist, removing tag $CYCLE_TAG}"
+                $debug git tag -d $CYCLE_TAG
+                $debug git push --delete $REL $CYCLE_TAG
+            fi
+        fi
+
+    done
 
     # remote
     if tag_remote_exists $REL_TAG $REL; then
         echo $REL_TAG exists in $REL, removing it
         $debug git push --delete $REL $REL_TAG
     else
-        exit_error $REL_TAG does not exist in $REL
+        $debug echo $REL_TAG does not exist in $REL
     fi
 
     # set the sync status
