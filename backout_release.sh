@@ -64,33 +64,8 @@ for repo in $($repos_cmd); do
 
     REL=https://github.deutsche-boerse.de/rel/$repo
 
-    # check for the release tag in regular repo then in cycle repo
-    if [[ -d $REPOS_LOCAL/$repo ]]; then
-        cd $REPOS_LOCAL/$repo
-        if ! tag_local_exists $REL_TAG; then
-            exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
-        else
-            # rel tag
-            echo $REL_TAG exists in local repo ${PWD}, removing it
-            $debug git tag -d $REL_TAG
-        fi
-    else
-        if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
-            cd $REPOS_LOCAL/$CYCLE/$repo
-            if ! tag_local_exists $REL_TAG; then
-                echo $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
-            else
-                # rel tag
-                echo $REL_TAG exists in local repo ${PWD}, removing it
-                $debug git tag -d $REL_TAG
-            fi
-        else
-            exit_error $repo does not exist in ${PWD}
-        fi
-    fi
-
-    ## exit if higher version already exists in SCM repo 
-    latest=$(rel_latest_appl.pl --repo $repo --cycle ${CYCLE} --appl ${APPLICATION} | sed s/^.*_//)
+    ## exit if higher version already exists in SCM repo # {{{
+    latest=$($dirname/rel_latest_appl.pl --repo $REPOS_LOCAL/$repo --cycle ${CYCLE} --appl ${APPLICATION} | sed s/^.*_//)
 
     higher_than() { # {{{
 
@@ -117,10 +92,36 @@ for repo in $($repos_cmd); do
             fi
         fi
     } # }}}
+    # }}}
 
     if [[ "${latest}" != 'No release tags found' ]]; then
         if higher_than $RELEASE $latest; then
             exit_error "Found newer release in rel repo: $latest, nothing to do."
+        fi
+    fi
+
+    # check for the release tag in regular repo then in cycle repo
+    if [[ -d $REPOS_LOCAL/$repo ]]; then
+        cd $REPOS_LOCAL/$repo
+        if ! tag_local_exists $REL_TAG; then
+            exit_error $REL_TAG does not exist in $REPOS_LOCAL/$repo
+        else
+            # rel tag
+            echo $REL_TAG exists in local repo ${PWD}, removing it
+            $debug git tag -d $REL_TAG
+        fi
+    else
+        if [[ -d $REPOS_LOCAL/$CYCLE/$repo ]]; then
+            cd $REPOS_LOCAL/$CYCLE/$repo
+            if ! tag_local_exists $REL_TAG; then
+                echo $REL_TAG does not exist in $REPOS_LOCAL/$CYCLE/$repo
+            else
+                # rel tag
+                echo $REL_TAG exists in local repo ${PWD}, removing it
+                $debug git tag -d $REL_TAG
+            fi
+        else
+            exit_error $repo does not exist in ${PWD}
         fi
     fi
 
@@ -129,6 +130,7 @@ for repo in $($repos_cmd); do
     prev_rel=$(prev_rel $RELEASE)
     prev_releases=($prev_rel)
 
+    # fixes will be ignored
     while [[ "${prev_rel}" != '0.00' ]]; do
         prev_rel=$(prev_rel $prev_rel)
         prev_releases+=($prev_rel)
