@@ -9,6 +9,8 @@ TAG=$1
 RELEASE_TAG="${2:-}"
 repos_dir=${PWD}
 
+tools=/local/git/scm/tools_git
+
 repos=
 if [[ ! -z $RELEASE_TAG ]]; then
     echo Searching for release tag $TAG
@@ -35,7 +37,9 @@ for dir in ${repos[*]}; do
 
 			for tag in ${tags[*]}; do
 				if [[ ${tag} == ${TAG} ]]; then
-					echo $repo
+                    reponame=$(echo $repo | sed 's/^.*\///')
+                    apps=$($tools/repo_appl_amadeus.pl dev/$reponame)
+					echo $repo $apps
 					break
 				fi
 			done
